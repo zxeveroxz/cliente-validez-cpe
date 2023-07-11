@@ -4,7 +4,10 @@ async function obtenerCabeceras(RUC) {
     try {
         const connection = await pool.getConnection();
         const query = ` SELECT 
-                            CDP.idx,CDP.ruc_,CDP.tip_ope,CONCAT(CDP.DOCUMENTO,ALM.serie) as SERIE, CDP.NUMERO, CDP.tot_vta, DATE_FORMAT(fec_ope, '%d/%m/%Y') as fec_ope  
+                            CDP.idx,CDP.ruc_,CDP.tip_ope,CONCAT(CDP.DOCUMENTO,ALM.serie) as SERIE, 
+                            CDP.NUMERO, 
+                            CDP.tot_vta, 
+                            DATE_FORMAT(fec_ope, '%d/%m/%Y') as fec_ope  
                          FROM (
                             SELECT 
                                 A.idx, A.ruc_, A.tip_ope, A.ANEXO, A.DOCUMENTO, A.NUMERO, A.fec_ope , A.tot_vta  
@@ -21,10 +24,23 @@ async function obtenerCabeceras(RUC) {
                                 C.idx IS NULL AND B.ruc_='${RUC}' AND B.tip_ope in ('07','08') AND B.usu_del is null AND YEAR(B.fecha)>=2023 
                         ) AS CDP
                          INNER JOIN tbl2_almacen ALM ON CDP.ANEXO=ALM.idx
+                         
                     `;
         //const query = `SELECT * FROM tbl2_CDP_cab WHERE ruc_='20600853563' AND tip_ope='01' AND year(fecha)>=2023 `;
         const [rows, fields] = await connection.query(query);
-        console.log(rows);
+        //console.log(rows);
+        connection.release();
+        return rows;        
+    } catch (error) {
+        console.error('Error al realizar la consulta:', error);
+    }
+}
+
+
+async function guardarRespuesta(DATA){    
+    try {
+        const connection = await pool.getConnection();
+        await connection.query('insert into tbl2_validez_sunat (idx, ruc_, tip_ope, estado,anulado,fecha_consulta,detalles) values (?,?,?,?,?,?,?)',DATA);
         connection.release();
     } catch (error) {
         console.error('Error al realizar la consulta:', error);
@@ -33,4 +49,4 @@ async function obtenerCabeceras(RUC) {
 
 
 
-module.exports = { obtenerCabeceras }
+module.exports = { obtenerCabeceras,guardarRespuesta }

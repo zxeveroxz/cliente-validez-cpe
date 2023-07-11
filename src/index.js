@@ -1,15 +1,34 @@
 require('dotenv').config();
 const RUC_LOCAL = process.env.RUC_LOCAL
-const {TOKEN} =  require('./token');
-const {obtenerCabeceras} = require('./consultas.js');
+const {TOKEN,VERIFICAR} =  require('./token');
+const {obtenerCabeceras,guardarRespuesta} = require('./consultas.js');
 
 
 let aa = async ()=>{
-    let a = await TOKEN();
-    console.log(a);
+    let to = await TOKEN();
+    //console.log(to.access_token);
 
-    obtenerCabeceras('20600853563');
+    let rows = await obtenerCabeceras('20600853563');
 
+    rows.map(async (row,index)=>{
+        let DATOS = {
+                    'numRuc':row.ruc_,
+                    'codComp':row.tip_ope,
+                    'numeroSerie':row.SERIE,
+                    'numero':row.NUMERO,
+                    'fechaEmision':row.fec_ope,
+                    'monto':row.tot_vta
+                    };
+                
+        setTimeout(async () => {                        
+            let RESP = await VERIFICAR(RUC_LOCAL,to.access_token,DATOS);
+            if(RESP.success==true) {
+                const fecha = new Date(); // Obtén la fecha actual de JavaScript            
+                const now = fecha.toISOString().slice(0, 19).replace('T', ' ');
+                await guardarRespuesta([row.idx,row.ruc_,row.tip_ope,RESP.data.estadoCp,null,now,null]);
+            }
+          }, 250*index )
+    });
 /*
     let r = { 'error': true, 'token':null};
 

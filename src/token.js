@@ -43,14 +43,14 @@ async function crearArchivo(pathToFile, contenido) {
 
 async function borrarArchivo(pathToFile) {
     try {
-      await fs.promises.unlink(pathToFile);
-      console.log('El archivo se ha borrado correctamente.');
-      return true;
+        await fs.promises.unlink(pathToFile);
+        console.log('El archivo se ha borrado correctamente.');
+        return true;
     } catch (error) {
-      console.error('Error al borrar el archivo:', error);
-      return false;
+        console.error('Error al borrar el archivo:', error);
+        return false;
     }
-  }
+}
 
 function calcularTiempoSegundos(fecha, ahora = '') {
     if (ahora === '')
@@ -81,10 +81,10 @@ async function TOKEN() {
             let data = JSON.parse(rawdata);
             return data;
         } else {
-                if(borrarArchivo(RUTA_TOKEN)){
-                    return await CREAR_TOKEN();
-                }
-                return null;
+            if (borrarArchivo(RUTA_TOKEN)) {
+                return await CREAR_TOKEN();
+            }
+            return null;
         }
 
     } else {
@@ -130,6 +130,34 @@ async function CREAR_TOKEN() {
 }
 
 
-module.exports = { TOKEN }
+
+
+async function VERIFICAR(RUC_LOCAL,TOKEN,DATOS) {
+
+    try {
+        const url = `https://api.sunat.gob.pe/v1/contribuyente/contribuyentes/${RUC_LOCAL}/validarcomprobante`;
+        const token = TOKEN;
+
+        const headers = {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        };
+
+        const respuesta = await axios.post(url, DATOS, {
+            headers: headers
+        });
+
+        //console.log(respuesta.data);
+        return respuesta.data;
+    } catch (error) {       
+        return null;
+        console.error('Error al hacer la solicitud:', error.message);
+    }
+
+}
+
+
+
+module.exports = { TOKEN,VERIFICAR }
 
 
