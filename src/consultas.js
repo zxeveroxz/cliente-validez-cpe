@@ -24,6 +24,8 @@ async function obtenerCabeceras(RUC) {
                                 C.idx IS NULL AND B.ruc_='${RUC}' AND B.tip_ope in ('07','08') AND B.usu_del is null AND YEAR(B.fecha)>=2023 
                         ) AS CDP
                          INNER JOIN tbl2_almacen ALM ON CDP.ANEXO=ALM.idx
+                         LIMIT 100
+
                          
                     `;
         //const query = `SELECT * FROM tbl2_CDP_cab WHERE ruc_='20600853563' AND tip_ope='01' AND year(fecha)>=2023 `;
@@ -41,6 +43,7 @@ async function guardarRespuesta(DATA){
     try {
         const connection = await pool.getConnection();
         await connection.query('insert into tbl2_validez_sunat (idx, ruc_, tip_ope, estado,anulado,fecha_consulta,detalles) values (?,?,?,?,?,?,?)',DATA);
+        console.log("carchivo registrado");
         connection.release();
     } catch (error) {
         console.error('Error al realizar la consulta:', error);

@@ -8,7 +8,7 @@ let aa = async ()=>{
     let to = await TOKEN();
     //console.log(to.access_token);
 
-    let rows = await obtenerCabeceras('20600853563');
+    let rows = await obtenerCabeceras('20522094120');
 
     rows.map(async (row,index)=>{
         let DATOS = {
