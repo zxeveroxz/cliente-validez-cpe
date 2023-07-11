@@ -29,6 +29,13 @@ let aa = async ()=>{
             }
           }, 250*index )
     });
+
+
+    setTimeout(async() => {
+        console.log("Volviendo a buscar ");
+        await aa();
+    }, 90*1000);
+
 /*
     let r = { 'error': true, 'token':null};
 

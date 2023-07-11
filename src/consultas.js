@@ -43,7 +43,7 @@ async function guardarRespuesta(DATA){
     try {
         const connection = await pool.getConnection();
         await connection.query('insert into tbl2_validez_sunat (idx, ruc_, tip_ope, estado,anulado,fecha_consulta,detalles) values (?,?,?,?,?,?,?)',DATA);
-        console.log("carchivo registrado");
+        console.log("carchivo registrado ", DATA);
         connection.release();
     } catch (error) {
         console.error('Error al realizar la consulta:', error);
