@@ -1,27 +1,28 @@
 require('dotenv').config();
 const RUC_LOCAL = process.env.RUC_LOCAL
-
 const {TOKEN} =  require('./token');
+const {obtenerCabeceras} = require('./consultas.js');
 
 
 let aa = async ()=>{
     let a = await TOKEN();
     console.log(a);
 
+    obtenerCabeceras('20600853563');
 
-
+/*
     let r = { 'error': true, 'token':null};
 
     const options = {
         method: 'POST',
-        url: `https://api.sunat.gob.pe/v1/contribuyente/contribuyentes/RUC/validarcomprobante`,
+        url: `https://api.sunat.gob.pe/v1/contribuyente/contribuyentes/${RUC_LOCAL}/validarcomprobante`,
         params: {
             "grant_type": "client_credentials",
             "scope": "https://api.sunat.gob.pe/v1/contribuyente/contribuyentes",
             "client_id": CLIENTE_ID,
             "client_secret": CLIENTE_SECRET
         },
-        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+        headers: { 'Authorization': 'Bearer '+a.access_token },
         data: [],
     };
 
@@ -48,7 +49,7 @@ let aa = async ()=>{
             return r
         });        
 
-
+*/
 
 }    
 

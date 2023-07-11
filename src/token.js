@@ -1,8 +1,6 @@
 require('dotenv').config();
 const axios = require('axios');
-const { error, log } = require('console');
 const fs = require('fs');
-const { resolve } = require('path');
 
 const CLIENTE_ID = process.env.client_id;
 const CLIENTE_SECRET = process.env.client_secret;
@@ -10,69 +8,95 @@ const CLIENTE_RUC = process.env.client_RUC; //+ Date.now();
 const RUTA_TOKEN = `TOKEN/${CLIENTE_RUC}.json`;
 
 
-function changeTimeZone(date, timeZone='America/Lima') {
+function changeTimeZone(date, timeZone = 'America/Lima') {
     if (typeof date === 'string') {
-      return new Date(
-        new Date(date).toLocaleString('es-ES', {
-          timeZone,
-        }),
-      );
+        return new Date(
+            new Date(date).toLocaleString('es-ES', {
+                timeZone,
+            }),
+        );
     }
-  
+
     return new Date(
-      date.toLocaleString('es-PE', {
-        timeZone,
-      }),
+        date.toLocaleString('es-PE', {
+            timeZone,
+        }),
     );
+}
+
+function cambiarZonaHora(date, timeZone = 'America/Lima') {
+    console.log(Date.now());
+    const fecha = date.toLocaleString('es-ES', 'America/Lima').split(",");
+    return { fecha: fecha[0], hora: fecha[1].trim() };
+}
+
+async function crearArchivo(pathToFile, contenido) {
+    try {
+        await fs.promises.writeFile(pathToFile, contenido);
+        console.log('El archivo se ha creado correctamente.');
+        return true;
+    } catch (error) {
+        console.error('Error al crear el archivo:', error);
+        return false;
+    }
+}
+
+async function borrarArchivo(pathToFile) {
+    try {
+      await fs.promises.unlink(pathToFile);
+      console.log('El archivo se ha borrado correctamente.');
+      return true;
+    } catch (error) {
+      console.error('Error al borrar el archivo:', error);
+      return false;
+    }
   }
 
-function cambiarZonaHora(date, timeZone='America/Lima') {     
-        console.log(Date.now());    
-        const fecha = date.toLocaleString('es-ES', 'America/Lima').split(",");        
-        return {fecha:fecha[0],hora:fecha[1].trim()};
-    } 
-
-function calcularTiempoSegundos(fecha,ahora=''){
-    if(ahora==='')
-        ahora = Date.now(); 
-    return parseInt((ahora-fecha)/1000);
+function calcularTiempoSegundos(fecha, ahora = '') {
+    if (ahora === '')
+        ahora = Date.now();
+    console.log((ahora - fecha) / 1000);
+    return parseInt((ahora - fecha) / 1000);
 }
 
-async function TOKEN_VALIDO(){
-    if (fs.existsSync(RUTA_TOKEN)) {        
-        let info =  fs.statSync(RUTA_TOKEN);        
-        if(calcularTiempoSegundos(info.birthtimeMs)<2900){
+async function TOKEN_VALIDO() {
+    if (fs.existsSync(RUTA_TOKEN)) {
+        let info = fs.statSync(RUTA_TOKEN);
+        if (calcularTiempoSegundos(info.birthtimeMs) < 2900) {
+            console.log("token valido ");
             return true
-        }else{
+        } else {
+            console.log("token NOOOOOO valido ");
             return false;
         }
-        
     }
 }
 
-async function TOKEN(){
+async function TOKEN() {
 
-    if (fs.existsSync(RUTA_TOKEN)) {        
-        
-        if(TOKEN_VALIDO()){
+    if (fs.existsSync(RUTA_TOKEN)) {
+        let estado = await TOKEN_VALIDO();
+        if (estado) {
             let rawdata = fs.readFileSync(RUTA_TOKEN);
             let data = JSON.parse(rawdata);
-            data.error=false;
             return data;
-        }else{
-            await fs.removeSync(RUTA_TOKEN);
-            return await CREAR_TOKEN();        
+        } else {
+                if(borrarArchivo(RUTA_TOKEN)){
+                    return await CREAR_TOKEN();
+                }
+                return null;
         }
-        
-    }else{
-        return await CREAR_TOKEN();        
+
+    } else {
+        let r = await CREAR_TOKEN();
+        return r
     }
 }
 
 
 async function CREAR_TOKEN() {
 
-    let r = { 'error': true, 'token':null};
+    let r = null
 
     const options = {
         method: 'POST',
@@ -87,29 +111,22 @@ async function CREAR_TOKEN() {
         data: [],
     };
 
-   let f = await axios
+    let f = await axios
         .request(options)
         .then(function (response) {
-            try {
-                fs.writeFileSync(RUTA_TOKEN, JSON.stringify(response.data));
-                r.error = false;         
-                r.token = response.data;       
-                return r
-            } catch (error) {
-                console.error('Error al Guardar el Toekn ', error);
-                r.mensaje = error;
-                return r
-            }
+            if (crearArchivo(RUTA_TOKEN, JSON.stringify(response.data)))
+                return response.data;
+            else
+                return null;
         })
-        .finally(function (){           
-            return r     
+        .finally(function () {
+            return r
         })
         .catch(function (error) {
-            
-            r.mensaje = error;
-            return r
-        });        
-       return f;
+            return null
+        });
+
+    return f;
 }
 
 
