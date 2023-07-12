@@ -10,7 +10,7 @@ let aa = async ()=>{
 
     let rows = await obtenerCabeceras('20522094120');
 
-    rows.map(async (row,index)=>{
+    await rows.map(async (row,index)=>{
         let DATOS = {
                     'numRuc':row.ruc_,
                     'codComp':row.tip_ope,
@@ -21,20 +21,29 @@ let aa = async ()=>{
                     };
                 
         setTimeout(async () => {                        
-            let RESP = await VERIFICAR(RUC_LOCAL,to.access_token,DATOS);
-            if(RESP.success==true) {
-                const fecha = new Date(); // Obtén la fecha actual de JavaScript            
-                const now = fecha.toISOString().slice(0, 19).replace('T', ' ');
-                await guardarRespuesta([row.idx,row.ruc_,row.tip_ope,RESP.data.estadoCp,null,now,null]);
+
+            try {
+                let RESP = await VERIFICAR(RUC_LOCAL,to.access_token,DATOS);            
+                if(RESP.success==true) {
+                    const fecha = new Date(); // Obtén la fecha actual de JavaScript            
+                    const now = fecha.toISOString().slice(0, 19).replace('T', ' ');
+                    //console.log(now);
+                    if(RESP.data.estadoCp!=null)
+                        await guardarRespuesta([row.idx,row.ruc_,row.tip_ope,RESP.data.estadoCp,0,now,null]);
+                }                
+            } catch (error) {
+                console.log("Error de Verificacion: ",error);
             }
-          }, 250*index )
+
+
+          }, 50*index )
     });
 
 
     setTimeout(async() => {
-        console.log("Volviendo a buscar ");
+        console.log("\n\nVolviendo a buscar \n");
         await aa();
-    }, 90*1000);
+    }, 10*1000);
 
 /*
     let r = { 'error': true, 'token':null};
