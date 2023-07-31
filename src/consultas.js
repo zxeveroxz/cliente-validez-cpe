@@ -35,6 +35,7 @@ async function obtenerCabecerasCDP(RUC) {
         return rows;        
     } catch (error) {
         console.error('Error al realizar la consulta:', error);
+        return false;
     }
 }
 
@@ -43,10 +44,11 @@ async function guardarRespuesta(DATA,TABLA=''){
     try {
         const connection = await pool.getConnection();
         await connection.query(`insert into tbl2_validez_sunat${TABLA} (idx, ruc_, tip_ope, estado,anulado,fecha_consulta,detalles) values (?,?,?,?,?,?,?)`,DATA);
-        console.log("carchivo registrado ", DATA[1],' ',DATA[0]);
+        console.log("Guardando archivo registrado RUC: ", DATA[1],' IDX: ',DATA[0],' Sunat:',DATA[3]);
         connection.release();
     } catch (error) {
         console.error('Error al realizar la consulta:', error);
+        
     }
 }
 
@@ -74,7 +76,7 @@ async function obtenerCabecerasPolloCDP(RUC) {
                                                 WHERE 
                                                     C.idx IS NULL AND B.ruc_='${RUC}' AND B.tip_ope in ('07','08') AND  YEAR(B.fec_ope)>=2023
                             ) AS CDP
-                                        LIMIT 150
+                                        LIMIT 300
                          
                     `;        
         const [rows, fields] = await connection.query(query);        
@@ -82,6 +84,7 @@ async function obtenerCabecerasPolloCDP(RUC) {
         return rows;        
     } catch (error) {
         console.error('Error al realizar la consulta:', error);
+        return false;
     }
 }
 
