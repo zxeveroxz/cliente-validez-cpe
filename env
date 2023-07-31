@@ -1,3 +1,17 @@
-client_id="-4b19-b71dacd7b9"
-client_secret="UjOJ5EtJm0Hw=="
-client_RUC="2060563"
+client_id="17f2****************************7b9"
+client_secret="UjO**********Hw=="
+client_RUC="206000000"
+
+
+#RUC DE LA EMPRESA QUE SE DESEA BUSCAR INFO
+#polleria ALERO
+RUC_LOCAL=2060000000009532
+#TIPO =['NORMAL','POLLO']
+TIPO=POLLO
+
+#config mysql
+MY_host='j*********com'
+MY_user='c****************pe'
+MY_password='*/*/*/*/*/*/*/+'
+MY_port=93306
+MY_database='BD_F*****************'
