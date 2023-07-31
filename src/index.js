@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { FechaHoraActual } = require('./util');
+const { FechaHoraActual,FormatearFecha } = require('./util');
 const RUC_LOCAL = process.env.RUC_LOCAL
 const { TOKEN, VERIFICAR } = require('./token');
 const { obtenerCabecerasCDP, obtenerCabecerasPolloCDP, guardarRespuesta } = require('./consultas.js');
@@ -88,7 +88,7 @@ let procesar_pollo = async () => {
     try {
         let to = await TOKEN();
         let rows = await obtenerCabecerasPolloCDP(RUC_LOCAL);
-        console.log("\nTotal Registros encontrados: ", rows.length);
+        console.log("\nTotal Registros encontrados: ", rows.length,"\n***************************************");
 
         const guardarPromesas = rows.map(async (row, index) => {
             let DATOS = {
@@ -96,7 +96,7 @@ let procesar_pollo = async () => {
                 'codComp': row.tip_ope,
                 'numeroSerie': row.SERIE,
                 'numero': row.NUMERO,
-                'fechaEmision': row.fec_ope,
+                'fechaEmision': FormatearFecha(row.fec_ope.toISOString()),
                 'monto': row.tot_vta
             };
 
@@ -110,9 +110,9 @@ let procesar_pollo = async () => {
         await Promise.all(guardarPromesas);
 
         setTimeout(async () => {
-            console.log(`\n\nVolviendo a buscar ${FechaHoraActual()} \n`);
+            console.log(`\nVolviendo a buscar ${FechaHoraActual()} \n`);
             await ejecutar();
-        }, (rows.length == 0 ? 30 : 3) * 1000);
+        }, (rows.length == 0 ? 30 : 5) * 1000);
     } catch (error) {
         console.log("Error de Verificacion: ", error);
         setTimeout(async () => {

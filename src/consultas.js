@@ -59,14 +59,14 @@ async function obtenerCabecerasPolloCDP(RUC) {
         const connection = await pool.getConnection();
         const query = ` 
                         SELECT 
-                        CDP.idx, CDP.ruc_, CDP.tip_ope, CDP.SERIE, CDP.NUMERO, CDP.total as tot_vta, DATE_FORMAT(fec_ope, '%d/%m/%Y') as fec_ope  
+                        CDP.idx, CDP.ruc_, CDP.tip_ope, CDP.SERIE, CDP.NUMERO, CDP.total as tot_vta, fec_ope  
                         FROM (
                                     SELECT 
                                         A.idx, A.ruc_, A.tip_ope,  A.SERIE, A.NUMERO, A.fec_ope , A.total  
                                                 FROM TTBL_CAB_VILLA A
                                                 LEFT JOIN tbl2_validez_sunat_POLLO C ON A.idx = C.idx
                                                 WHERE 
-                                                    C.idx IS NULL AND A.ruc_='${RUC}' AND A.tip_ope in ('01','03') AND  YEAR(A.fec_ope)>=2023
+                                                    C.idx IS NULL AND A.ruc_='${RUC}' AND A.tip_ope in ('01','03') AND  A.fec_ope>='2023-01-01 00:00:00'
                                 UNION                               
                     
                                     SELECT 
@@ -74,7 +74,7 @@ async function obtenerCabecerasPolloCDP(RUC) {
                                                 FROM TTBL_CAB_VILLA_NC B
                                                 LEFT JOIN tbl2_validez_sunat_POLLO C ON B.idx = C.idx
                                                 WHERE 
-                                                    C.idx IS NULL AND B.ruc_='${RUC}' AND B.tip_ope in ('07','08') AND  YEAR(B.fec_ope)>=2023
+                                                    C.idx IS NULL AND B.ruc_='${RUC}' AND B.tip_ope in ('07','08') AND B.fec_ope>='2023-01-01 00:00:00'
                             ) AS CDP
                                         LIMIT 300
                          
