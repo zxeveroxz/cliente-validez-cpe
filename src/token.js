@@ -25,7 +25,7 @@ function changeTimeZone(date, timeZone = 'America/Lima') {
 }
 
 function cambiarZonaHora(date, timeZone = 'America/Lima') {
-    console.log(Date.now());
+    //console.log(Date.now());
     const fecha = date.toLocaleString('es-ES', 'America/Lima').split(",");
     return { fecha: fecha[0], hora: fecha[1].trim() };
 }
@@ -55,7 +55,7 @@ async function borrarArchivo(pathToFile) {
 function calcularTiempoSegundos(fecha, ahora = '') {
     if (ahora === '')
         ahora = Date.now();
-    console.log((ahora - fecha) / 1000);
+    //console.log((ahora - fecha) / 1000);
     return parseInt((ahora - fecha) / 1000);
 }
 

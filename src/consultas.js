@@ -1,6 +1,6 @@
 const pool = require('./db');
 
-async function obtenerCabeceras(RUC) {
+async function obtenerCabecerasCDP(RUC) {
     try {
         const connection = await pool.getConnection();
         const query = ` SELECT 
@@ -27,8 +27,7 @@ async function obtenerCabeceras(RUC) {
                          LIMIT 150
 
                          
-                    `;
-        //const query = `SELECT * FROM tbl2_CDP_cab WHERE ruc_='20600853563' AND tip_ope='01' AND year(fecha)>=2023 `;
+                    `;        
         const [rows, fields] = await connection.query(query);
         //console.log(rows);
         connection.release();
@@ -52,4 +51,4 @@ async function guardarRespuesta(DATA){
 
 
 
-module.exports = { obtenerCabeceras,guardarRespuesta }
+module.exports = { obtenerCabecerasCDP,guardarRespuesta }
