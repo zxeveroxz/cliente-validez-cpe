@@ -1,3 +1,4 @@
+//const {FechaHoraActual} = require('./util');
 const pool = require('./db');
 
 async function obtenerCabecerasCDP(RUC) {
@@ -86,4 +87,4 @@ async function obtenerCabecerasPolloCDP(RUC) {
 
 
 
-module.exports = { obtenerCabecerasCDP,guardarRespuesta }
+module.exports = { obtenerCabecerasCDP, obtenerCabecerasPolloCDP,guardarRespuesta }
