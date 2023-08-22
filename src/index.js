@@ -118,7 +118,7 @@ let procesar_pollo = async () => {
         setTimeout(async () => {
             console.log("\n\nVolviendo a buscar desde el error \n");
             await ejecutar();
-        }, 15 * 1000);
+        }, 14 * 1000);
     }
 }
 
