@@ -2,7 +2,7 @@ require('dotenv').config();
 const { FechaHoraActual,FormatearFecha } = require('./util');
 const RUC_LOCAL = process.env.RUC_LOCAL
 const { TOKEN, VERIFICAR } = require('./token');
-const { obtenerCabecerasCDP, obtenerCabecerasPolloCDP, guardarRespuesta } = require('./consultas.js');
+const { obtenerCabecerasCDP, obtenerCabecerasPolloCDP, guardarRespuesta, eliminarRespuesta, obtenerCabecerasPolloCDP_COMPROBAR } = require('./consultas.js');
 
 
 let procesar = async () => {
@@ -90,24 +90,56 @@ let procesar_pollo = async () => {
         let rows = await obtenerCabecerasPolloCDP(RUC_LOCAL);
         console.log("\nTotal Registros encontrados: ", rows.length,"\n***************************************");
 
-        const guardarPromesas = rows.map(async (row, index) => {
-            let DATOS = {
-                'numRuc': row.ruc_,
-                'codComp': row.tip_ope,
-                'numeroSerie': row.SERIE,
-                'numero': row.NUMERO,
-                'fechaEmision': FormatearFecha(row.fec_ope.toISOString()),
-                'monto': row.tot_vta
-            };
+        if(rows.length==0){
 
-            let RESP = await VERIFICAR(RUC_LOCAL, to.access_token, DATOS);
-            if (RESP.success == true && RESP.data.estadoCp != null) {
-                const now = FechaHoraActual()
-                return guardarRespuesta([row.idx, row.ruc_, row.tip_ope, RESP.data.estadoCp, 0, now, null], '_POLLO');
-            }
-        });
+            console.log("\nVamos a Comprobar CPD ya leidos anteriormente: ");
+            let rowsC = await obtenerCabecerasPolloCDP_COMPROBAR(RUC_LOCAL);
+            
+            const guardarPromesas = rowsC.map(async (row, index) => {
+                let DATOS = {
+                    'numRuc': row.ruc_,
+                    'codComp': row.tip_ope,
+                    'numeroSerie': row.SERIE,
+                    'numero': row.NUMERO,
+                    'fechaEmision': FormatearFecha(row.fec_ope.toISOString()),
+                    'monto': row.tot_vta
+                };
+    
+                let RESP = await VERIFICAR(RUC_LOCAL, to.access_token, DATOS);
+                //console.log("respuesta server: ",RESP.success);
+                if (RESP.success == true && RESP.data.estadoCp != null) {
+                    await eliminarRespuesta([row.idx, row.ruc_, row.tip_ope], '_POLLO');
+                    const now = FechaHoraActual()
+                    return guardarRespuesta([row.idx, row.ruc_, row.tip_ope, RESP.data.estadoCp, 0, now, null], '_POLLO');
+                }
+            });       
+            await Promise.all(guardarPromesas); 
 
-        await Promise.all(guardarPromesas);
+        }else{
+            const guardarPromesas = rows.map(async (row, index) => {
+                let DATOS = {
+                    'numRuc': row.ruc_,
+                    'codComp': row.tip_ope,
+                    'numeroSerie': row.SERIE,
+                    'numero': row.NUMERO,
+                    'fechaEmision': FormatearFecha(row.fec_ope.toISOString()),
+                    'monto': row.tot_vta
+                };
+    
+                let RESP = await VERIFICAR(RUC_LOCAL, to.access_token, DATOS);
+                //console.log("respuesta server: ",RESP.success);
+                if (RESP.success == true && RESP.data.estadoCp != null) {
+                    const now = FechaHoraActual()
+                    return guardarRespuesta([row.idx, row.ruc_, row.tip_ope, RESP.data.estadoCp, 0, now, null], '_POLLO');
+                }
+            });        
+            await Promise.all(guardarPromesas);
+        }
+
+
+       
+
+
 
         setTimeout(async () => {
             console.log(`\nVolviendo a buscar ${FechaHoraActual()} \n`);
@@ -118,7 +150,7 @@ let procesar_pollo = async () => {
         setTimeout(async () => {
             console.log("\n\nVolviendo a buscar desde el error \n");
             await ejecutar();
-        }, 14 * 1000);
+        }, 25 * 1000);
     }
 }
 

@@ -150,8 +150,9 @@ async function VERIFICAR(RUC_LOCAL,TOKEN,DATOS) {
         //console.log(respuesta.data);
         return respuesta.data;
     } catch (error) {       
-        return null;
         console.error('Error al hacer la solicitud:', error.message);
+        return {success:false,error:error.message};
+        
     }
 
 }
